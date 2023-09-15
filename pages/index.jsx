@@ -2,14 +2,18 @@ import Date from '@/components/Date';
 import Button from '@/components/Ui/Button/Button';
 import Input from '@/components/Ui/Input/Input';
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateTasks, UpdatedTrash, completedTasks } from '@/store/TodoReducer';
 import { MdAdd, MdOutlineEdit, MdDelete } from 'react-icons/md';
 function Index() {
+  const tasksData = useSelector((state) => state.todoReducer.tasks);
+  const dispatch = useDispatch();
   const [task, setTask] = useState('');
   const [description, setDescription] = useState('');
-  const [taskData, settaskData] = useState([]);
+  // const [taskData, settaskData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [editValues, setEditvalues] = useState({});
-  const [completedTask, setCompletedTask] = useState([]);
+  // const [editValues, setEditvalues] = useState({});
+  // const [completedTask, setCompletedTask] = useState([]);
   const taskHandler = (event) => {
     setTask(event.target.value);
   };
@@ -21,42 +25,45 @@ function Index() {
   };
   const submitHandler = (event) => {
     event.preventDefault();
-    settaskData((prev) => {
-      return [...prev, { task, description }];
-    });
+    // settaskData((prev) => {
+    //   return [...prev, { task, description }];
+    // });
+    const data = [{ task, description }];
+
+    dispatch(updateTasks(data));
 
     setTask('');
     setDescription('');
   };
-  const deleteHandler = (id) => {
-    const data = taskData.filter((tasks) => taskData[id].task != tasks.task);
-    settaskData(data);
-  };
-  const editHandler = (id) => {
-    const editdTask = taskData.find(
-      (tasks) => taskData[id].task === tasks.task,
-    );
-    setEditvalues(editdTask);
-  };
+  // const deleteHandler = (id) => {
+  //   const data = taskData.filter((tasks) => taskData[id].task != tasks.task);
+  //   settaskData(data);
+  // };
+  // const editHandler = (id) => {
+  //   const editdTask = taskData.find(
+  //     (tasks) => taskData[id].task === tasks.task,
+  //   );
+  //   setEditvalues(editdTask);
+  // };
 
-  const taskCompleteHandler = (id) => {
-    const remainingTask = taskData.filter(
-      (tasks) => taskData[id].task != tasks.task,
-    );
-    const completedtask = taskData.find(
-      (tasks) => taskData[id].task === tasks.task,
-    );
-    settaskData(remainingTask);
-    setCompletedTask((prev) => {
-      return [...prev, completedtask];
-    });
-  };
+  // const taskCompleteHandler = (id) => {
+  //   const remainingTask = taskData.filter(
+  //     (tasks) => taskData[id].task != tasks.task,
+  //   );
+  //   const completedtask = taskData.find(
+  //     (tasks) => taskData[id].task === tasks.task,
+  //   );
+  //   settaskData(remainingTask);
+  //   setCompletedTask((prev) => {
+  //     return [...prev, completedtask];
+  //   });
+  // };
   return (
     <React.Fragment>
       <div className=" mx-auto mt-12 h-screen w-4/5  sm:w-4/5 ">
         <Date />
         <ul className="mt-2">
-          {taskData &&
+          {/* {taskData &&
             taskData.map((itme, index) => (
               <li
                 key={index + 1}
@@ -87,7 +94,7 @@ function Index() {
                   </Button>
                 </div>
               </li>
-            ))}
+            ))} */}
         </ul>
         {!open ? (
           <Button
