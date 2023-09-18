@@ -1,19 +1,37 @@
+'use client';
 import Date from '@/components/Date';
 import Button from '@/components/Ui/Button/Button';
 import Input from '@/components/Ui/Input/Input';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateTasks, UpdatedTrash, completedTasks } from '@/store/TodoReducer';
+import { UpdatedTrash, completedTasks, updateTasks } from '@/store/TodoReducer';
 import { MdAdd, MdOutlineEdit, MdDelete } from 'react-icons/md';
 function Index() {
   const tasksData = useSelector((state) => state.todoReducer.tasks);
   const dispatch = useDispatch();
   const [task, setTask] = useState('');
   const [description, setDescription] = useState('');
-  // const [taskData, settaskData] = useState([]);
   const [open, setOpen] = useState(false);
-  // const [editValues, setEditvalues] = useState({});
-  // const [completedTask, setCompletedTask] = useState([]);
+  const fetchTodo = async () => {
+    try {
+      const data = await fetch('/api/route/route');
+
+      const res = await data.json();
+      const resData = res.result;
+      const totaltodo = [];
+      for (const key in resData) {
+        totaltodo.push({
+          id: resData[key]._id,
+          task: resData[key].task,
+          description: resData[key].description,
+        });
+      }
+      dispatch(updateTasks(totaltodo));
+    } catch (err) {
+      console.log('Tis IS error', err);
+    }
+  };
+
   const taskHandler = (event) => {
     setTask(event.target.value);
   };
@@ -23,22 +41,33 @@ function Index() {
   const descriptionHandler = (event) => {
     setDescription(event.target.value);
   };
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
-    // settaskData((prev) => {
-    //   return [...prev, { task, description }];
-    // });
-    const data = [{ task, description }];
-
-    dispatch(updateTasks(data));
-
+    const data = { task, description, isCompleted: false };
+    try {
+      const todoPost = await fetch('/api/route/route', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (err) {
+      console.log(err);
+    }
     setTask('');
     setDescription('');
   };
-  // const deleteHandler = (id) => {
-  //   const data = taskData.filter((tasks) => taskData[id].task != tasks.task);
-  //   settaskData(data);
-  // };
+  useEffect(() => {
+    fetchTodo();
+  }, [submitHandler]);
+  const deleteHandler = async (id) => {
+    console.log(id);
+    const data = await fetch(`/api/route/${id}`, {
+      method: 'DELETE',
+    });
+  };
+  // dispatch(UpdatedTrash(id));
   // const editHandler = (id) => {
   //   const editdTask = taskData.find(
   //     (tasks) => taskData[id].task === tasks.task,
@@ -46,55 +75,56 @@ function Index() {
   //   setEditvalues(editdTask);
   // };
 
-  // const taskCompleteHandler = (id) => {
-  //   const remainingTask = taskData.filter(
-  //     (tasks) => taskData[id].task != tasks.task,
-  //   );
-  //   const completedtask = taskData.find(
-  //     (tasks) => taskData[id].task === tasks.task,
-  //   );
-  //   settaskData(remainingTask);
-  //   setCompletedTask((prev) => {
-  //     return [...prev, completedtask];
-  //   });
-  // };
+  const taskCompleteHandler = async (id) => {
+    console.log(id);
+    const data = await fetch(`/api/route/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isCompleted: true }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const res = await data.json();
+    // dispatch(completedTasks(id));
+  };
   return (
     <React.Fragment>
       <div className=" mx-auto mt-12 h-screen w-4/5  sm:w-4/5 ">
         <Date />
+
         <ul className="mt-2">
-          {/* {taskData &&
-            taskData.map((itme, index) => (
+          {tasksData &&
+            tasksData.map((item) => (
               <li
-                key={index + 1}
+                key={item.id}
                 className="mb-3 flex  justify-between rounded-lg border  border-pink-300/30 py-3 ps-4 shadow hover:py-4 hover:shadow-xl"
               >
                 <div className="flex items-center">
                   <Input
-                    onChange={() => taskCompleteHandler(index)}
+                    onChange={() => taskCompleteHandler(item.id)}
                     id="link-checkbox"
                     type="checkbox"
                     className="h-[17px] w-[17px] appearance-none rounded-full border-2 border-slate-950/50 bg-white transition-all duration-300 ease-in-out checked:border-green-600 checked:bg-green-500 focus:ring-2 focus:ring-green-600"
                   />
 
-                  <p className="text-md ms-2">{itme.task}</p>
+                  <p className="text-md ms-2">{item.task}</p>
                 </div>
                 <div className="me-8 flex">
                   <Button
-                    onClick={() => editHandler(index)}
+                    onClick={() => editHandler(item.id)}
                     className="rounded-md bg-green-600/80 px-1 hover:rounded-full hover:bg-green-600  hover:text-white"
                   >
                     <MdOutlineEdit />
                   </Button>
                   <Button
-                    onClick={() => deleteHandler(index)}
+                    onClick={() => deleteHandler(item.id)}
                     className="me-4 ms-3  rounded-md border bg-red-600/80 px-1  hover:rounded-full hover:bg-red-500  hover:text-white "
                   >
                     <MdDelete />
                   </Button>
                 </div>
               </li>
-            ))} */}
+            ))}
         </ul>
         {!open ? (
           <Button
@@ -111,12 +141,10 @@ function Index() {
               type="text"
               placeholder="Task name"
               value={task}
-              // defaultValue={editValues ? editValues.task : ''}
               className=" w-full  ps-2 text-sm font-normal  focus:outline-none"
             />
             <Input
               type="text"
-              // defaultValue={editValues ? editValues.description : ''}
               onChange={descriptionHandler}
               placeholder="Description"
               value={description}
