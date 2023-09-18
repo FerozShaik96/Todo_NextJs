@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   tasks: [],
-  completedtask: [],
+  completetask: [],
 };
 
 const TodoReducer = createSlice({
@@ -9,29 +9,19 @@ const TodoReducer = createSlice({
   initialState,
   reducers: {
     updateTasks(state, action) {
-      console.log(action.payload);
-      console.log((state.tasks = action.payload));
       state.tasks = action.payload;
     },
     completedTasks(state, action) {
-      state.tasks = state.tasks.filter(
-        (tasks) => state.tasks[action.payload].task != tasks.task,
-      );
-      state.completedtask = state.tasks.find(
-        (tasks) => state.tasks[action.payload].task === tasks.task,
-      );
-      //   const remainingTask = state.tasks.filter(
-      //     (tasks) => action.payload != tasks._id,
-      //   );
-      t; //   const completedtask = state.tasks.find(
-      //     (tasks) => action.payload === tasks._id,
-      //   );
+      const taskId = action.payload;
+      state.tasks = state.tasks.filter((tasks) => taskId != tasks.id);
+      const completeTask = state.tasks.find((taks) => taskId === taks.id);
+      if (completeTask) {
+        state.completetask.push(completeTask);
+      }
+      console.log(state.completetask);
     },
     UpdatedTrash(state, action) {
-      state.tasks = state.tasks.filter(
-        (task) => task.task != state.tasks[action.payload].task,
-      );
-      //   state.tasks = state.tasks.filter((task) => task._id != action.payload);
+      state.tasks = state.tasks.filter((task) => task.id != action.payload);
     },
   },
 });
